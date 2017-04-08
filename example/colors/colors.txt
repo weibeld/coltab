@@ -1,9 +1,9 @@
 # Indigo-Orange Palette
 
-* #3F51B5
-* #303F9F
-+ #C5CAE9
-+ #FF5722
+- #3F51B5
+- #303F9F
+- #C5CAE9
+- #FF5722
 - #212121
 - #757575
 - #BDBDBD
