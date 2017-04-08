@@ -25,4 +25,4 @@ An HTML file written to `stdout`.
     - `#RRGGBB`
     - `RGB`
     - `#RGB`
-- The input file should be valid [Pandoc-flavoured Markdown](http://pandoc.org/MANUAL.html)
+- The input file is expected to be in [Pandoc Markdown](http://pandoc.org/MANUAL.html) format
