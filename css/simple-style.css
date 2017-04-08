@@ -1,0 +1,18 @@
+body {
+  font-family: sans-serif;
+  padding: 20px;
+}
+
+tr {
+  height: 50px;
+}
+
+td.color {
+  width: 150px;
+}
+
+td.code {
+  padding-left: 15px;
+  font-size: 20;
+  font-family: monospace;
+}

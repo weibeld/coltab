@@ -1,0 +1,23 @@
+# Indigo-Orange Palette
+
+* #3F51B5
+* #303F9F
++ #C5CAE9
++ #FF5722
+- #212121
+- #757575
+- #BDBDBD
+
+# Gray-Black
+
+- #181818
+- #2B2B2E
+- #262629
+- #1C1C1F
+- #414447
+
+# Android Studio Darcula
+
+- #2E3032
+- #202020
+- #212223

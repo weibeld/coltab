@@ -1,0 +1,119 @@
+#!/usr/bin/env perl
+#
+# Convert Markdown file lists of RGB color codes to HTML.
+#
+# Usage:
+#     coltab <markdown-file> [<css-file>]
+#------------------------------------------------------------------------------#
+
+use strict;
+use warnings;
+
+# Command line arguments
+@ARGV >= 1 or die "Wrong number of arguments";
+my ($iname, $css) = @ARGV;
+
+# Get file handle for input file
+open(my $i, '<', $iname) or die "Can't open file $iname for reading: $!";
+
+# True if currently construcing an HTML table, and false otherwise
+my $is_table = 0;
+
+# Print HTML preamble (<html><head>, etc.)
+output(get_preamble($css));
+
+# Parse Markdown file and create body of HTML file
+while (<$i>) {
+  my $line = $_;
+
+  # Parse titles
+  if (my $title = parse_title($line)) {
+    output($title);
+  }
+
+  # Parse list items
+  if (my $item = parse_list_item($line)) {
+    output($item);
+  }
+}
+
+# Print HTML postamble (</html>)
+output(get_postamble());
+
+
+#------------------------------------------------------------------------------#
+# Subroutines
+#------------------------------------------------------------------------------#
+
+# Print output (to stdout)
+sub output {
+  my $arg = shift;
+  print $arg;
+}
+
+# Parse line for a Markdown list item; if the line has a list item, return the
+# corresponding HTML <tr> element, otherwise return nothing
+sub parse_list_item {
+  my $line = shift;
+  my $out;
+  # If line contains a list item
+  if ($line =~ /^[*+-]\s+`?\#?([a-f0-9]{3}|[a-f0-9]{6})`?\s*$/i) {
+    my $code = "#$1";
+    if (!$is_table) {
+      $out .= "<table>\n";
+      $is_table = 1;
+    }
+    $out .= "<tr>\n";
+    $out .= "<td class=\"color\" style=\"background-color:$code\" />\n";
+    $out .= "<td class=\"code\">$code</td>\n";
+    $out .= "</tr>\n";
+  }
+  # If line is first non-list-item line after a list
+  elsif ($is_table) {
+    $out = "</table>\n\n";
+    $is_table = 0;
+  }
+  return $out;
+}
+
+# Parse line for a Markdown header; if the line has a Markdown header, return
+# the corresponding HTML header, othwerise return nothing
+sub parse_title {
+  my $line = shift;
+  for my $i (1 .. 5) {
+    my $pat = get_title_pat($i);
+    return "<h$i>$1</h$i>\n\n" if ($line =~ /$pat/);
+  }
+}
+
+# Return regex pattern for Markdown headers
+sub get_title_pat {
+  my $n = shift;
+  return "^" . "#"x$n . " (.*)\$";
+}
+
+
+# Return HTML preamble
+sub get_preamble {
+  my $css = shift;
+
+  my $out;
+  $out .= "<html>\n";
+  $out .= "<head>\n";
+  $out .= "<style>\n";
+  if ($css) {
+    open(my $f, '<', $css) or die "Can't open file $css for reading: $!";
+    while (<$f>) {
+      $out .= $_;
+    }
+  }
+  $out .= "</style>\n";
+  $out .= "</head>\n\n";
+  $out .= "<body>\n";
+  return $out;
+}
+
+# Return HTML postamble
+sub get_postamble {
+  return "</html>\n";
+}
