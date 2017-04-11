@@ -9,10 +9,12 @@
 use strict;
 use warnings;
 use feature qw(say);
+use File::Basename;
 use HTML::TagTree;
 use Getopt::Std;
 
 our $VERSION = "0.1";
+our $SCRIPT_NAME = basename($0);
 
 # If set to true, exit script after processing --help or --version flags
 $Getopt::Std::STANDARD_HELP_VERSION = 1;
@@ -39,25 +41,34 @@ print get_html();
 
 # Called by Getopt::Std when supplying --help option
 sub HELP_MESSAGE {
-  say get_help_message();
+  print get_help_message();
 }
 
 # Called by Getopt::Std when supplying --version or --help option
 sub VERSION_MESSAGE {
-  say "coltab version $VERSION";
+  say "$SCRIPT_NAME version $VERSION";
 }
 
 # Abort script due to error (e.g. invalid command-line options)
 sub abort {
   my $msg = shift;
   say $msg if ($msg);
-  say get_help_message();
+  print get_help_message();
   exit 1;
 }
 
 # Help message
 sub get_help_message {
-  return "Hi, I'm the help message :)";
+  return <<"EOF"
+Usage:
+  $SCRIPT_NAME [options] <markdown-file>
+
+Options:
+  -c <file>  CSS file
+  -l         Only link to CSS file (rather than including it)
+  --help     Show this screen
+  --version  Show version information
+EOF
 }
 
 #------------------------------------------------------------------------------#
