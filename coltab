@@ -8,16 +8,68 @@
 
 use strict;
 use warnings;
+use feature qw(say);
+use File::Basename;
 use HTML::TagTree;
+use Getopt::Std;
 
-@ARGV >= 1 or die "Wrong number of arguments";
-my ($markdown, $css) = @ARGV;
+our $VERSION = "0.1";
+our $SCRIPT_NAME = basename($0);
 
+# If set to true, exit script after processing --help or --version flags
+$Getopt::Std::STANDARD_HELP_VERSION = 1;
+
+# Command-line options
+my %opts;
+getopts('c:l', \%opts) or abort();
+my $css = $opts{c};
+my $is_link_css = $opts{l};
+
+# Command-line positional arguments
+@ARGV == 1 or abort("Error: incorrect number of arguments");
+my $markdown = $ARGV[0];
+
+# Do work
 init_html();
-set_css($css);
+set_css($css) if ($css);
 parse_file($markdown);
 print get_html();
 
+#------------------------------------------------------------------------------#
+# Subroutines
+#------------------------------------------------------------------------------#
+
+# Called by Getopt::Std when supplying --help option
+sub HELP_MESSAGE {
+  print get_help_message();
+}
+
+# Called by Getopt::Std when supplying --version or --help option
+sub VERSION_MESSAGE {
+  say "$SCRIPT_NAME version $VERSION";
+}
+
+# Abort script due to error (e.g. invalid command-line options)
+sub abort {
+  my $msg = shift;
+  say $msg if ($msg);
+  print get_help_message();
+  exit 1;
+}
+
+# Help message
+sub get_help_message {
+  return <<"EOF"
+Usage:
+  $SCRIPT_NAME [options] <markdown-file>
+
+Options:
+  -c <file>  CSS file
+  -l         Only link to CSS file (rather than including it)
+  --help     Show this screen
+  --version  Show version information
+EOF
+}
 
 #------------------------------------------------------------------------------#
 # HTML Manager
