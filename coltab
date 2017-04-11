@@ -1,10 +1,4 @@
 #!/usr/bin/env perl
-#
-# Convert Markdown file lists of RGB color codes to HTML.
-#
-# Usage:
-#     coltab <markdown-file> [<css-file>]
-#------------------------------------------------------------------------------#
 
 use strict;
 use warnings;
@@ -22,6 +16,7 @@ $Getopt::Std::STANDARD_HELP_VERSION = 1;
 # Command-line options
 my %opts;
 getopts('c:l', \%opts) or abort();
+# These vars are true if and only if the corresponding options are specified
 my $css = $opts{c};
 my $is_link_css = $opts{l};
 
@@ -31,7 +26,7 @@ my $markdown = $ARGV[0];
 
 # Do work
 init_html();
-set_css($css) if ($css);
+set_css($css, $is_link_css) if ($css);
 parse_file($markdown);
 print get_html();
 
@@ -41,23 +36,23 @@ print get_html();
 
 # Called by Getopt::Std when supplying --help option
 sub HELP_MESSAGE {
-  print get_help_message();
+  stdo(get_help_message());
 }
 
 # Called by Getopt::Std when supplying --version or --help option
 sub VERSION_MESSAGE {
-  say "$SCRIPT_NAME version $VERSION";
+  stdo_ln("$SCRIPT_NAME version $VERSION");
 }
 
 # Abort script due to error (e.g. invalid command-line options)
 sub abort {
   my $msg = shift;
-  say $msg if ($msg);
-  print get_help_message();
+  stde_ln($msg) if ($msg);
+  stde(get_help_message());
   exit 1;
 }
 
-# Help message
+# Get help message
 sub get_help_message {
   return <<"EOF"
 Usage:
@@ -70,6 +65,13 @@ Options:
   --version  Show version information
 EOF
 }
+
+# Print argument to stdout or stderr, respectively
+sub stdo { print STDOUT shift; }
+sub stde { print STDERR shift; }
+sub stdo_ln { say STDOUT shift; }
+sub stde_ln { say STDERR shift; }
+
 
 #------------------------------------------------------------------------------#
 # HTML Manager
@@ -95,10 +97,15 @@ sub init_html {
   $body = $html->body();
 }
 
-# Set the CSS for the final HTML file.
+# Add CSS information to HTML tree.
+# Arguments:
+#   $css:     a valid filename
+#   $is_link: bool: true => add link to CSS file; false => include CSS content
 sub set_css {
-  my $css = shift;
-  if (defined $css) {
+  my($css, $is_link) = @_;
+  if ($is_link) {
+    $head->link('', "rel=\"stylesheet\" href=\"$css\"");
+  } else {
     map_file(my $css_content, $css);
     $head->style($css_content);
   }
