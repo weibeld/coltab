@@ -1,0 +1,79 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use feature qw(say);
+use File::Basename qw(dirname basename);
+use Getopt::Std;
+use Cwd qw(abs_path);
+
+# Add directory containing our modules (../lib) to @INC so they can be imported
+use lib dirname(dirname(abs_path(__FILE__))) . '/lib';
+use Weibeld::Coltab::ParseManager qw(parse_file);
+use Weibeld::Coltab::HTMLManager qw(init_html set_css get_html);
+
+our $VERSION = "0.1";
+our $SCRIPT_NAME = basename($0);
+
+# If set to true, exit script after processing --help or --version flags
+$Getopt::Std::STANDARD_HELP_VERSION = 1;
+
+# Command-line options
+my %opts;
+getopts('c:l', \%opts) or abort();
+# These vars are true if and only if the corresponding options are specified
+my $css = $opts{c};
+my $is_link_css = $opts{l};
+
+# Command-line positional arguments
+@ARGV == 1 or abort("Error: incorrect number of arguments");
+my $markdown = $ARGV[0];
+
+# Do work
+init_html();
+set_css($css, $is_link_css) if ($css);
+parse_file($markdown);
+print get_html();
+
+#------------------------------------------------------------------------------#
+# Subroutines
+#------------------------------------------------------------------------------#
+
+# Called by Getopt::Std when supplying --help option
+sub HELP_MESSAGE {
+    stdo(get_help_message());
+}
+
+# Called by Getopt::Std when supplying --version or --help option
+sub VERSION_MESSAGE {
+    stdo_ln("$SCRIPT_NAME version $VERSION");
+}
+
+# Abort script due to error (e.g. invalid command-line options)
+sub abort {
+    my $msg = shift;
+    stde_ln($msg) if ($msg);
+    stde(get_help_message());
+    exit 1;
+}
+
+# Get help message
+sub get_help_message {
+    return <<"EOF"
+Usage:
+$SCRIPT_NAME [options] <markdown-file>
+
+Options:
+-c <file>  CSS file
+-l         Only link to CSS file (rather than including it)
+--help     Show this screen
+--version  Show version information
+EOF
+}
+
+# Print argument to stdout or stderr, respectively
+sub stdo { print STDOUT shift; }
+sub stde { print STDERR shift; }
+sub stdo_ln { say STDOUT shift; }
+sub stde_ln { say STDERR shift; }
+
