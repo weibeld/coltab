@@ -12,8 +12,8 @@ use lib dirname(dirname(abs_path(__FILE__))) . '/lib';
 use Weibeld::Coltab::ParseManager qw(parse_file);
 use Weibeld::Coltab::HTMLManager qw(init_html set_css get_html);
 
-our $VERSION = "0.1";
-our $SCRIPT_NAME = basename($0);
+our $VERSION = "0.01";
+my $SCRIPT_NAME = basename($0);
 
 # If set to true, exit script after processing --help or --version flags
 $Getopt::Std::STANDARD_HELP_VERSION = 1;
@@ -29,7 +29,7 @@ my $is_link_css = $opts{l};
 @ARGV == 1 or abort("Error: incorrect number of arguments");
 my $markdown = $ARGV[0];
 
-# Do work
+# Do actual work
 init_html();
 set_css($css, $is_link_css) if ($css);
 parse_file($markdown);

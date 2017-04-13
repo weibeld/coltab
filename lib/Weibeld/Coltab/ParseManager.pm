@@ -2,16 +2,20 @@ package Weibeld::Coltab::ParseManager;
 
 use strict;
 use warnings;
-use Exporter qw(import);
+use Carp;
 use Weibeld::Coltab::HTMLManager qw(add_header start_new_table add_table_row);
 
+# Import 'import' so that a user of this module can call 'import(<subs>)'
+use Exporter qw(import);
 our @EXPORT_OK = qw(parse_file);
+
+our $VERSION = "0.01";
 
 my $is_table_started;
 
 sub parse_file {
     my $fname = shift;
-    open(my $f, '<', $fname) or die "Can't open file $fname for reading: $!";
+    open(my $f, '<', $fname) or croak "Can't open file $fname for reading: $!";
     # Loop through all the lines of the input file
     while (<$f>) {
         next if parse_list_item($_);

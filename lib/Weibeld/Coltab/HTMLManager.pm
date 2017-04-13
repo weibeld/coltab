@@ -2,6 +2,7 @@ package Weibeld::Coltab::HTMLManager;
 
 use strict;
 use warnings;
+use Carp;
 use HTML::TagTree;
 use File::Map qw(map_file);
 use feature qw(switch);
@@ -11,6 +12,9 @@ no warnings 'experimental::smartmatch';
 use Exporter qw(import);
 our @EXPORT_OK = qw(init_html set_css add_header
                     start_new_table add_table_row get_html);
+
+our $VERSION = "0.01";
+
 my $html;
 my $head;
 my $body;
@@ -47,7 +51,7 @@ sub add_header{
         when (4) { $body->h4($text); }
         when (5) { $body->h5($text); }
         when (6) { $body->h6($text); }
-        default { die "Invalid HTML header level"; }
+        default { croak "Invalid HTML header level"; }
     }
 }
 
