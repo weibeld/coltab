@@ -74,3 +74,33 @@ sub get_html{
 }
 
 1;
+
+__END__
+
+
+=head1 NAME
+
+Weibeld::Coltab::HTMLManager - manage the output HTML creation of the coltab application
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+=head1 CAVEATS
+
+=head1 AUTHOR
+
+Daniel Weibel I<E<lt>info@weibeld.netE<gt>>
+
+=head1 SEE ALSO
+
+L<Weibeld::Coltab::ParseManager>
+
+=head1 LICENSE
+
+Copyright 2017 Daniel Weibel
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
