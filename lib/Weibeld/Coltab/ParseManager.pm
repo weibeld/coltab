@@ -18,14 +18,14 @@ sub parse_file {
     open(my $f, '<', $fname) or croak "Can't open file $fname for reading: $!";
     # Loop through all the lines of the input file
     while (<$f>) {
-        next if parse_list_item($_);
+        next if _parse_list_item($_);
         # If it's not a list item and there's an open table, close the table
         if ($is_table_started) { $is_table_started = 0; }
-        next if parse_header($_);
+        next if _parse_header($_);
     }
 }
 
-sub parse_list_item {
+sub _parse_list_item {
     my $line = shift;
     # Test if the line is a list item
     if ($line =~ /^[*+-]\s+`?\#?([a-f0-9]{3}|[a-f0-9]{6})`?\s*$/i) {
@@ -38,16 +38,16 @@ sub parse_list_item {
     }
 }
 
-sub parse_header {
+sub _parse_header {
     my $line = shift;
-    if (is_header($line)) {
-        my %header = get_header($line);
+    if (_is_header($line)) {
+        my %header = _get_header($line);
         add_header($header{level}, $header{text});
         return 1;
     }
 }
 
-sub get_header {
+sub _get_header {
     my $line = shift;
     for my $i (1 .. 6) {
         my $pattern = "^" . "#"x$i . "\\s+(.*)\$";
@@ -57,7 +57,7 @@ sub get_header {
     }
 }
 
-sub is_header {
+sub _is_header {
     my $line = shift;
     return ($line =~ /^#{1,6}\s/);
 }
