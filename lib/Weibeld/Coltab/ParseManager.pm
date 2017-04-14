@@ -78,7 +78,7 @@ Weibeld::Coltab::ParseManager - parse the input Markdown file of the B<coltab> a
 
 =head1 DESCRIPTION
 
-This module parses the Markdown input file of the B<coltab> application for headers and bullet-point lists items and instructs the Weibeld::Coltab::HTMLManager module to add a corresponding element to the output HTML file.
+This module parses the Markdown input file of the B<coltab> application for headers and bullet-point list items and instructs the Weibeld::Coltab::HTMLManager module to add a corresponding element to the output HTML file.
 
 In particular, for each header encountered in the input file, the module instructs Weibeld::Coltab::HTMLManager to add a corresponding HTML header to the HTML tree, and for each encountered list item, the module instructs Weibeld::Coltab::HTMLManager to add a table row to the HTML tree.
 
@@ -88,7 +88,7 @@ In particular, for each header encountered in the input file, the module instruc
 
 =item parse_file
 
-Parses the input file as described above.
+Parses the input file as described in L</DESCRIPTION>.
 
 The C<parse_file> function takes a single argument, which must be a relative or absolute filename of a Markdown file.
 
@@ -98,7 +98,7 @@ The function returns an undefined value in any case.
 
 =head1 AUTHOR
 
-Daniel Weibel E<lt>L<info@weibeld.net|mailto:info@weibeld.net>E<gt>
+Daniel Weibel <L<info@weibeld.net|mailto:info@weibeld.net>>
 
 =head1 SEE ALSO
 
