@@ -20,8 +20,9 @@ $Getopt::Std::STANDARD_HELP_VERSION = 1;
 
 # Command-line options
 my %opts;
-getopts('c:l', \%opts) or abort();
+getopts('t:c:l', \%opts) or abort();
 # These vars are true if and only if the corresponding options are specified
+my $title = $opts{t};
 my $css = $opts{c};
 my $is_link_css = $opts{l};
 
@@ -30,7 +31,7 @@ my $is_link_css = $opts{l};
 my $markdown = $ARGV[0];
 
 # Do actual work
-init_html();
+init_html($title);
 set_css($css, $is_link_css) if ($css);
 parse_file($markdown);
 print get_html();
@@ -61,13 +62,14 @@ sub abort {
 sub get_help_message {
     return <<"EOF"
 Usage:
-$SCRIPT_NAME [options] <markdown-file>
+  $SCRIPT_NAME [options] <markdown-file>
 
 Options:
--c <file>  CSS file
--l         Only link to CSS file (rather than including it)
---help     Show this screen
---version  Show version information
+  -t <title>  Title of HTML output file
+  -c <file>   CSS file
+  -l          Only link to CSS file (rather than including it)
+  --help      Show this screen
+  --version   Show version information
 EOF
 }
 

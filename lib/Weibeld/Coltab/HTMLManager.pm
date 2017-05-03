@@ -20,10 +20,12 @@ my $head;
 my $body;
 my $table;
 
-# Initialise a new HTML tree. Must be called before all other subroutines.
+# Initialise a new HTML tree. Call before all other functions of this module.
 sub init_html {
+    my $title = shift;
     $html= HTML::TagTree->new('html');
     $head = $html->head();
+    $head->title($title) if ($title);
     $body = $html->body();
 }
 
