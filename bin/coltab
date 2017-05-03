@@ -33,8 +33,29 @@ my $markdown = $ARGV[0];
 # Do actual work
 init_html($title);
 set_css($css, $is_link_css) if ($css);
-parse_file($markdown);
-print get_html();
+my %callbacks = (
+    on_header_found => \&on_header_found,
+    on_list_item_found => \&on_list_item_found,
+    on_list_interrupted => \&on_list_interrupted
+);
+parse_file($markdown, \%callbacks);
+#parse_file($markdown);
+#print get_html();
+
+
+sub on_list_item_found {
+    my $list_item = shift;
+    say "List item found: $list_item";
+}
+
+sub on_header_found {
+    my $header = shift;
+    say "Header found: $header";
+}
+
+sub on_list_interrupted {
+    say "List interrupted";
+}
 
 #------------------------------------------------------------------------------#
 # Subroutines
