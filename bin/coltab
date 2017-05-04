@@ -10,7 +10,8 @@ use Cwd qw(abs_path);
 # Add directory containing our modules (../lib) to @INC so they can be imported
 use lib dirname(dirname(abs_path(__FILE__))) . '/lib';
 use Weibeld::Coltab::ParseManager qw(parse_file);
-use Weibeld::Coltab::HTMLManager qw(init_html set_css get_html);
+use Weibeld::Coltab::HTMLManager qw(html_init html_set_css html_add_header
+                                    html_add_row html_end_table html_get);
 
 our $VERSION = "0.01";
 my $SCRIPT_NAME = basename($0);
@@ -30,14 +31,45 @@ my $is_link_css = $opts{l};
 @ARGV == 1 or abort("Error: incorrect number of arguments");
 my $markdown = $ARGV[0];
 
+# Callback function references for the ParseManager
+my %callbacks = (
+    on_header_found => \&on_header_found,
+    on_list_item_found => \&on_list_item_found,
+    on_list_interrupted => \&on_list_interrupted
+);
+
 # Do actual work
-init_html($title);
-set_css($css, $is_link_css) if ($css);
-parse_file($markdown);
-print get_html();
+html_init($title);
+html_set_css($css, $is_link_css) if ($css);
+parse_file($markdown, \%callbacks);
+print html_get();
+
 
 #------------------------------------------------------------------------------#
-# Subroutines
+# Callbacks for ParseManager
+#------------------------------------------------------------------------------#
+sub on_list_item_found {
+    my $color = _sanitize_color(shift);
+    html_add_row($color);
+}
+
+sub on_header_found {
+    my($content, $level) = @_;
+    html_add_header($content, $level);
+}
+
+sub on_list_interrupted {
+    html_end_table();
+}
+
+sub _sanitize_color {
+    my $s = shift;
+    $s =~ /^`?\#?([a-f0-9]{3}|[a-f0-9]{6})`?\s*$/i or die("Invalid color: $s");
+    return "#$1";
+}
+
+#------------------------------------------------------------------------------#
+# Misc subroutines
 #------------------------------------------------------------------------------#
 
 # Called by Getopt::Std when supplying --help option
