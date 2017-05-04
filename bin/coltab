@@ -26,6 +26,13 @@ my $title = $opts{t};
 my $css = $opts{c};
 my $is_link_css = $opts{l};
 
+# Callback function references for the ParseManager
+my %callbacks = (
+    on_header_found => \&on_header_found,
+    on_list_item_found => \&on_list_item_found,
+    on_list_interrupted => \&on_list_interrupted
+);
+
 # Command-line positional arguments
 @ARGV == 1 or abort("Error: incorrect number of arguments");
 my $markdown = $ARGV[0];
@@ -33,28 +40,32 @@ my $markdown = $ARGV[0];
 # Do actual work
 init_html($title);
 set_css($css, $is_link_css) if ($css);
-my %callbacks = (
-    on_header_found => \&on_header_found,
-    on_list_item_found => \&on_list_item_found,
-    on_list_interrupted => \&on_list_interrupted
-);
 parse_file($markdown, \%callbacks);
-#parse_file($markdown);
 #print get_html();
 
 
+#------------------------------------------------------------------------------#
+# Callbacks for ParseManager
+#------------------------------------------------------------------------------#
 sub on_list_item_found {
     my $list_item = shift;
+    _validate_list_item($list_item);
     say "List item found: $list_item";
 }
 
 sub on_header_found {
-    my $header = shift;
-    say "Header found: $header";
+    my($content, $level) = @_;
+    say "Header found: $content (level $level)";
 }
 
 sub on_list_interrupted {
     say "List interrupted";
+}
+
+sub _validate_list_item {
+    my $list_item = shift;
+    $list_item =~ /^`?\#?([a-f0-9]{3}|[a-f0-9]{6})`?\s*$/i
+        or die("Invalid colour: $list_item");
 }
 
 #------------------------------------------------------------------------------#

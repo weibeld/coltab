@@ -11,73 +11,60 @@ our(@EXPORT_OK, $VERSION);
 $VERSION = "0.01";
 @EXPORT_OK = qw(parse_file);
 
-my $is_table_started;
+# /^[*+-]\s+`?\#?([a-f0-9]{3}|[a-f0-9]{6})`?\s*$/i
 
+my $is_open_list;
 my $callbacks;
 
 sub parse_file {
     my $file = shift;
     $callbacks = shift;
+    $is_open_list = 0;
 
+    # Loop through all the lines of the file
     open(my $f, '<', $file) or croak "Can't open file $file for reading: $!";
-    # Loop through all the lines of the input file
     while (<$f>) {
-        next if _parse_list_item($_);
-        # If it's not a list item and there's an open table, close the table
-        if ($is_table_started) { $is_table_started = 0; }
-        next if _parse_header($_);
+        # Test if line is a list item
+        if (my $item = _parse_list_item($_)) {
+            $callbacks->{on_list_item_found}->($item);
+            $is_open_list = 1 if ($is_open_list == 0);
+            next;
+        # If line is not a list item, test if an ongoing list is interrupted
+        } else {
+            _interrupt_list();
+        }
+        # Test if line is a header
+        if (my $h = _parse_header($_)) {
+            $callbacks->{on_header_found}->($h->{content}, $h->{level});
+            next;
+        }
     }
+
+    # Test if EOF is ending an ongoing list
+    _interrupt_list();
 }
 
-
-sub parse_file_old {
-    my $fname = shift;
-    open(my $f, '<', $fname) or croak "Can't open file $fname for reading: $!";
-    # Loop through all the lines of the input file
-    while (<$f>) {
-        next if _parse_list_item($_);
-        # If it's not a list item and there's an open table, close the table
-        if ($is_table_started) { $is_table_started = 0; }
-        next if _parse_header($_);
+sub _interrupt_list {
+    if ($is_open_list) {
+        $callbacks->{on_list_interrupted}->();
+        $is_open_list = 0;
     }
 }
 
 sub _parse_list_item {
     my $line = shift;
-    # Test if the line is a list item
-    if ($line =~ /^[*+-]\s+`?\#?([a-f0-9]{3}|[a-f0-9]{6})`?\s*$/i) {
-        if (not $is_table_started) {
-            #start_new_table();
-            $is_table_started = 1;
-        }
-        #add_table_row("#$1");
-        $callbacks->{on_list_item_found}->("#$1");
-        return 1;
-    }
+    return $1 if ($line =~ /^[*+-]\s+(.*)$/);
 }
 
 sub _parse_header {
     my $line = shift;
-    if (_is_header($line)) {
-        my %header = _get_header($line);
-        #add_header($header{level}, $header{text});
-        return 1;
-    }
-}
-
-sub _get_header {
-    my $line = shift;
     for my $i (1 .. 6) {
-        my $pattern = "^" . "#"x$i . "\\s+(.*)\$";
-        if ($line =~ /$pattern/) {
-            return (level => $i, text => $1);
+        my $pat = "^" . "#"x$i . "\\s+(.*)\$";
+        if ($line =~ /$pat/) {
+            my %hash = (level => $i, content => $1);
+            return \%hash;
         }
     }
-}
-
-sub _is_header {
-    my $line = shift;
-    return ($line =~ /^#{1,6}\s/);
 }
 
 1;
